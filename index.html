@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TamBoy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --page:#ebe7f2; --shell-hi:rgba(255,255,255,.55); --shell-lo:rgba(70,40,150,.5); --on-shell:#3d2b6e;
+  --bezel:#1c1b21; --bezel-ink:#8f8c99; --ink:#211a2c; --muted:#5d5470;
+  --key:#4b4b53; --key-on:#2c2c32; --face:#4d4d55; --face-on:#323238; --face-ink:#b9b9c2;
+  --led-on:#ff4757; --led-off:#4a2440; --tool:#f6f3fa; --tool-line:#a79fb8;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --page:#121018; --ink:#ebe6f3; --muted:#a59bb8;
+    --tool:#221d2b; --tool-line:#4a4258;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#121018; --ink:#ebe6f3; --muted:#a59bb8;
+  --tool:#221d2b; --tool-line:#4a4258;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;min-height:100%;background:var(--page);color:var(--ink);
+  font-family:"Chakra Petch","Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 12px 24px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+button{font:inherit}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+.console{
+  width:min(100%,520px);position:relative;isolation:isolate;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .3 0 0 0 -.08'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/160px 160px,
+    radial-gradient(ellipse 70% 40% at 18% 0%,rgba(255,255,255,.34),rgba(255,255,255,0) 70%),
+    linear-gradient(160deg,rgba(255,255,255,.38) 0%,rgba(255,255,255,.10) 26%,rgba(255,255,255,0) 48%),
+    linear-gradient(180deg,rgba(146,104,224,.30),rgba(122,82,208,.40)),
+    radial-gradient(circle,rgba(110,74,190,.55) 0 1.6px,rgba(255,255,255,.9) 1.8px 2.6px,transparent 3px) 6px 10px/26px 30px,
+    linear-gradient(90deg,transparent 0 47%,rgba(104,70,184,.35) 47% calc(47% + 2px),transparent calc(47% + 2px)),
+    repeating-linear-gradient(90deg,transparent 0 44px,rgba(104,70,184,.22) 44px 45px,transparent 45px 97px),
+    repeating-linear-gradient(0deg,transparent 0 58px,rgba(104,70,184,.2) 58px 59px),
+    #f1ecf7;
+  border-radius:22px 22px 64px 22px;padding:16px 18px 64px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.55),
+    inset 0 2px 0 1px var(--shell-hi),
+    inset 0 0 0 7px rgba(104,66,196,.34),
+    inset 0 0 44px 12px rgba(88,50,180,.46),
+    inset 0 -6px 0 1px var(--shell-lo),
+    0 1px 0 rgba(255,255,255,.6),
+    0 2px 3px rgba(40,20,80,.28),
+    0 10px 26px -8px rgba(140,100,230,.55),
+    0 26px 44px -14px rgba(30,14,70,.45);
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+}
+.console>*{position:relative;z-index:1}
+.console::before,.console::after{content:"";position:absolute;z-index:0;pointer-events:none}
+.console::before{left:24px;bottom:16px;width:96px;height:80px;border-radius:4px;
+  background:
+    linear-gradient(rgba(48,28,100,.82),rgba(48,28,100,.82)) 11px 11px/calc(100% - 22px) calc(100% - 22px) no-repeat,
+    repeating-linear-gradient(90deg,rgba(232,224,248,.95) 0 3px,transparent 3px 7px) 13px 2px/calc(100% - 26px) 7px no-repeat,
+    repeating-linear-gradient(90deg,rgba(232,224,248,.95) 0 3px,transparent 3px 7px) 13px 100%/calc(100% - 26px) 7px no-repeat,
+    repeating-linear-gradient(0deg,rgba(232,224,248,.95) 0 3px,transparent 3px 7px) 2px 13px/7px calc(100% - 26px) no-repeat,
+    repeating-linear-gradient(0deg,rgba(232,224,248,.95) 0 3px,transparent 3px 7px) 100% 13px/7px calc(100% - 26px) no-repeat,
+    rgba(120,88,200,.18);
+  box-shadow:inset 0 0 0 1px rgba(80,50,160,.35)}
+.console::after{right:22px;bottom:14px;width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(50,26,110,.85) 0 3px,rgba(235,228,250,.6) 3.4px 4px,transparent 4.4px) 1px 1px/11px 11px,rgba(140,108,215,.28);
+  box-shadow:0 0 0 3px rgba(96,62,178,.4),0 0 0 9px rgba(255,255,255,.14)}
+.top{display:flex;align-items:center;justify-content:space-between;padding:0 6px 12px}
+.logo{font-weight:700;font-style:italic;font-size:1.4rem;letter-spacing:.01em;color:rgba(60,36,125,.6);text-shadow:0 1px 0 rgba(255,255,255,.45);margin:0}
+.power{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--on-shell)}
+.led{width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8a5560,var(--led-off) 60%);box-shadow:inset 0 1px 2px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.5)}
+.led.on{background:radial-gradient(circle at 35% 30%,#ffd0d5 0,#ff3b50 45%,#b3001c 100%);box-shadow:0 0 8px 1px rgba(255,60,80,.8),0 1px 0 rgba(255,255,255,.5)}
+.led.paused{animation:blink 1.2s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.25}}
+
+.bezel{background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.02) 30%,rgba(255,255,255,0) 45%),var(--bezel);border-radius:12px 12px 36px 12px;padding:14px 14px 10px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.6),0 0 0 1px rgba(50,24,100,.35),0 1px 0 1px rgba(255,255,255,.35)}
+.screen::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(122deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.03) 30%,rgba(255,255,255,0) 55%);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.04)}
+body.drag .bezel{outline:3px dashed var(--face);outline-offset:4px}
+.screen{position:relative;aspect-ratio:var(--ar,160/144);background:#000;border-radius:3px;overflow:hidden}
+canvas{display:block;width:100%;height:100%;image-rendering:auto}
+.screen:fullscreen{border-radius:0;display:flex;align-items:center;justify-content:center;aspect-ratio:auto}
+.screen:fullscreen canvas{height:100%;width:auto;max-width:100%;aspect-ratio:var(--ar,160/144)}
+.empty{
+  z-index:2;
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;padding:20px;color:#d6d9df;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),#121413;
+}
+.empty h2{margin:0;font-size:1.3rem;font-weight:700}
+.empty p{margin:0;font-size:.9rem;color:#8f959e;max-width:30ch;line-height:1.4}
+.pick{font-weight:600;background:var(--face);color:var(--face-ink);border:0;border-radius:999px;padding:10px 22px;cursor:pointer;margin-top:4px}
+.toast{
+  z-index:3;
+  position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+  background:rgba(0,0,0,.8);color:#fff;padding:7px 12px;border-radius:8px;font-size:.85rem;
+  opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center
+}
+.toast.show{opacity:1}
+.status{display:flex;justify-content:space-between;gap:12px;font-size:.78rem;color:var(--bezel-ink);padding:8px 2px 0}
+.status span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.pad{display:grid;grid-template-columns:1fr auto;align-items:center;margin-top:26px;padding:0 4px;row-gap:20px;touch-action:none}
+.guts{position:absolute;inset:0;z-index:-1;pointer-events:none;filter:blur(.35px) drop-shadow(1px 2px 1.5px rgba(60,30,120,.28))}
+.console>.traces{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;filter:blur(.35px)}
+.guts span{position:absolute;display:block}
+.guts .ring{left:-15px;top:-19px;width:176px;height:176px;border-radius:50%;
+  background:radial-gradient(circle,transparent 0 57%,rgba(90,58,170,.3) 58% 60%,rgba(255,255,255,.2) 61% 100%);
+  box-shadow:0 0 0 2px rgba(96,62,178,.38),inset 0 0 0 9px rgba(120,84,200,.16)}
+.guts .mem-ab{right:-13px;top:29px;width:182px;height:80px;border-radius:40px;transform:rotate(-30.6deg);
+  background:rgba(175,145,238,.3);box-shadow:inset 0 0 0 2px rgba(96,62,178,.42),0 0 0 6px rgba(255,255,255,.14)}
+.guts .mem-ss{left:50%;bottom:-2px;width:200px;height:56px;margin-left:-100px;border-radius:28px;
+  background:rgba(175,145,238,.26);box-shadow:inset 0 0 0 2px rgba(96,62,178,.36)}
+.guts .parts{left:50%;top:14px;width:30px;height:70px;margin-left:-15px;
+  background:
+    linear-gradient(rgba(60,36,120,.7),rgba(60,36,120,.7)) 2px 0/12px 6px no-repeat,
+    linear-gradient(rgba(60,36,120,.7),rgba(60,36,120,.7)) 20px 12px/6px 12px no-repeat,
+    linear-gradient(rgba(60,36,120,.7),rgba(60,36,120,.7)) 6px 36px/14px 6px no-repeat,
+    radial-gradient(circle,rgba(60,36,120,.65) 0 5px,transparent 5.5px) 14px 54px/12px 12px no-repeat}
+.pad::before{content:"";position:absolute;z-index:-1;left:8px;right:8px;top:-22px;height:12px;pointer-events:none;
+  background:radial-gradient(circle,rgba(228,222,240,.95) 0 2.4px,rgba(80,50,150,.55) 2.7px 3.3px,transparent 3.6px) 0 0/10px 12px;
+  border-top:1px solid rgba(96,62,178,.3);border-bottom:1px solid rgba(96,62,178,.3)}
+.dpad{position:relative;width:138px;height:138px;touch-action:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25));cursor:pointer}
+.arm,.hub{position:absolute;background:var(--key)}
+.arm.up{left:46px;top:0;width:46px;height:50px;border-radius:6px 6px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.arm.down{left:46px;bottom:0;width:46px;height:50px;border-radius:0 0 6px 6px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.28)}
+.arm.left{left:0;top:46px;width:50px;height:46px;border-radius:6px 0 0 6px;box-shadow:inset 1px 1px 0 rgba(255,255,255,.12)}
+.arm.right{right:0;top:46px;width:50px;height:46px;border-radius:0 6px 6px 0;box-shadow:inset -2px -2px 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12)}
+.arm::after{content:"";position:absolute;width:0;height:0;border:6px solid transparent}
+.arm.up::after{left:17px;top:12px;border-top:0;border-bottom:9px solid rgba(0,0,0,.3)}
+.arm.down::after{left:17px;bottom:12px;border-bottom:0;border-top:9px solid rgba(0,0,0,.3)}
+.arm.left::after{top:17px;left:12px;border-left:0;border-right:9px solid rgba(0,0,0,.3)}
+.arm.right::after{top:17px;right:12px;border-right:0;border-left:9px solid rgba(0,0,0,.3)}
+.arm.on{background:var(--key-on)}
+.hub{left:46px;top:46px;width:46px;height:46px}
+.hub::after{content:"";position:absolute;inset:12px;border-radius:50%;box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.ab{position:relative;width:148px;height:112px;justify-self:end}
+.face{
+  position:absolute;width:60px;height:60px;border-radius:50%;border:0;cursor:pointer;
+  background:radial-gradient(circle at 38% 30%,#6c6c75 0%,#4d4d55 46%,#38383f 100%);color:var(--face-ink);font-weight:700;font-size:1.05rem;
+  text-shadow:0 -1px 0 rgba(0,0,0,.45);
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,.35),inset 0 2px 2px rgba(255,255,255,.14),0 3px 0 #2a2a30,0 5px 7px rgba(30,15,60,.35),0 0 0 5px rgba(110,72,196,.4);touch-action:none
+}
+.face.b{left:0;bottom:0}
+.face.a{right:0;top:0}
+.face.on{background:radial-gradient(circle at 40% 34%,#55555d 0%,#3c3c43 50%,#2c2c32 100%);transform:translateY(3px);box-shadow:inset 0 2px 4px rgba(0,0,0,.45),0 0 0 #2a2a30,0 1px 2px rgba(30,15,60,.3),0 0 0 5px rgba(110,72,196,.4)}
+.mid{grid-column:1/-1;display:flex;justify-content:center;gap:24px}
+.pill{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;font-size:.75rem;color:var(--on-shell);cursor:pointer;padding:6px;touch-action:none}
+.pill::before{content:"";width:52px;height:13px;border-radius:999px;background:linear-gradient(#5a5a62,#3b3b42);transform:rotate(-22deg);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 2px 0 #2a2a30,0 3px 4px rgba(30,15,60,.3)}
+.pill.on::before{background:linear-gradient(#3f3f46,#2e2e34);transform:rotate(-22deg) translateY(2px);box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+
+.tools{width:min(100%,520px);display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.tool{font-size:.88rem;font-weight:600;color:var(--ink);background:var(--tool);border:1px solid var(--tool-line);border-radius:8px;padding:8px 14px;min-height:40px;cursor:pointer}
+.tool:disabled{opacity:.45;cursor:default}
+.vol{width:min(100%,520px);display:flex;align-items:center;gap:12px;margin-top:14px;padding:0 6px;font-size:.88rem;font-weight:600;color:var(--ink)}
+.vol input{flex:1;accent-color:#7a52d0;height:28px;cursor:pointer}
+.vol span{min-width:4ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.keys{max-width:54ch;text-align:center;font-size:.85rem;color:var(--muted);line-height:1.5;margin:16px 0 0}
+@media (pointer:coarse){.keys{display:none}}
+@media (max-width:360px){.dpad{transform:scale(.88);transform-origin:left center}.ab{transform:scale(.88);transform-origin:right center}}
+
+@media (orientation:landscape) and (max-height:520px){
+  body{padding:8px 12px}
+  .console{width:100%;max-width:none;border-radius:20px;padding:12px 18px;display:grid;
+    grid-template-columns:auto 1fr auto;grid-template-areas:"dpad bezel ab" "dpad mid ab";column-gap:24px;align-items:center}
+  .top{display:none}
+  .guts,.pad::before,.console>.traces{display:none}
+  .console::before,.console::after{display:none}
+  .pad{display:contents}
+  .dpad{grid-area:dpad}
+  .ab{grid-area:ab}
+  .mid{grid-area:mid;margin-top:6px}
+  .bezel{grid-area:bezel;justify-self:center;border-radius:12px;padding:8px 8px 4px}
+  .screen{height:calc(100svh - 120px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));width:auto}
+}
+@media (prefers-reduced-motion:reduce){.led.paused{animation:none;opacity:.5}.toast{transition:none}}
+</style>
+</head>
+<body>
+<main class="console" aria-label="TamBoy game player">
+  <svg class="traces" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="rgba(98,62,180,.34)" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"><path vector-effect="non-scaling-stroke" d="M2 60H30L35 65V80"/><path vector-effect="non-scaling-stroke" d="M98 62H70L65 67V74"/><path vector-effect="non-scaling-stroke" d="M40 58V63L45 68H55L60 63V58"/><path vector-effect="non-scaling-stroke" d="M33 97H44L48 93H66"/><path vector-effect="non-scaling-stroke" d="M50 72V85L54 89H62"/><path vector-effect="non-scaling-stroke" d="M6 68V88L10 92"/><path vector-effect="non-scaling-stroke" d="M94 86V70L90 66"/><path vector-effect="non-scaling-stroke" d="M3 4V40"/><path vector-effect="non-scaling-stroke" d="M97 6V44L94 48"/></g></svg>
+  <div class="top">
+    <p class="logo">TamBoy</p>
+    <div class="power"><span class="led" id="led"></span><span id="powerLabel">Off</span></div>
+  </div>
+  <div class="bezel">
+    <div class="screen" id="screen">
+      <canvas id="cv" width="160" height="144" aria-label="Game screen"></canvas>
+      <div class="empty" id="empty">
+        <h2>Insert a game</h2>
+        <p>Open a Game Boy, Game Boy Color, or NES ROM (.gb, .gbc, .nes). It’s read locally and never uploaded.</p>
+        <button class="pick" id="pick">Open ROM</button>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+    <div class="status"><span id="gname">No game loaded</span><span id="gstate"></span></div>
+  </div>
+  <div class="pad">
+    <div class="guts" aria-hidden="true"><span class="ring"></span><span class="mem-ab"></span><span class="mem-ss"></span><span class="parts"></span></div>
+    <div class="dpad" id="dpad" role="group" aria-label="Direction pad">
+      <span class="arm up" data-dir="up"></span>
+      <span class="arm down" data-dir="down"></span>
+      <span class="arm left" data-dir="left"></span>
+      <span class="arm right" data-dir="right"></span>
+      <span class="hub"></span>
+    </div>
+    <div class="ab">
+      <button class="face b" data-b="b" aria-label="B button">B</button>
+      <button class="face a" data-b="a" aria-label="A button">A</button>
+    </div>
+    <div class="mid">
+      <button class="pill" data-b="select">Select</button>
+      <button class="pill" data-b="start">Start</button>
+    </div>
+  </div>
+</main>
+
+<nav class="tools" aria-label="Player controls">
+  <button class="tool" id="tOpen">Open ROM</button>
+  <button class="tool" id="tPause" disabled>Pause</button>
+  <button class="tool" id="tReset" disabled>Reset</button>
+  <button class="tool" id="tSave" disabled>Save state</button>
+  <button class="tool" id="tLoad" disabled>Load state</button>
+  <button class="tool" id="tSound">Sound on</button>
+  <button class="tool" id="tAuto">Auto-start on</button>
+  <button class="tool" id="tFull">Full screen</button>
+</nav>
+<div class="vol">
+  <label for="vol">Volume</label>
+  <input type="range" id="vol" min="0" max="100" step="1" value="80">
+  <span id="volVal">80%</span>
+</div>
+<p class="keys">Keyboard: arrows or WASD to move, X for A, Z for B, Enter for Start, Shift for Select, P to pause, minus and plus for volume. You can also drop a .gb, .gbc, or .nes file onto the screen. USB and Bluetooth gamepads work too.</p>
+<input type="file" id="file" hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/jsnes@1.2.1/dist/jsnes.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wasmboy@0.7.1/dist/core/getWasmBoyTsCore.closure.umd.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  const scr = $('screen');
+  // The emulator draws into a small off-screen canvas. It is scaled up by a whole
+  // number with hard pixels, then the browser smooths only the last fraction, so
+  // pixels stay even and don't shimmer while the picture scrolls.
+  const src = document.createElement('canvas'), sctx = src.getContext('2d');
+  let W = 0, H = 0, img, buf32, crop = { x: 0, y: 0, w: 160, h: 144 };
+  function present(){
+    sctx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(src, crop.x, crop.y, crop.w, crop.h, 0, 0, cv.width, cv.height);
+  }
+  function fitCanvas(){
+    const r = cv.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const k = Math.max(1, Math.floor((r.width || crop.w) * dpr / crop.w));
+    if (cv.width !== crop.w * k || cv.height !== crop.h * k){ cv.width = crop.w * k; cv.height = crop.h * k; }
+    if (img) present();
+  }
+  function setScreen(w, h, c){
+    crop = c || { x: 0, y: 0, w: w, h: h };
+    if (w !== W || h !== H){
+      W = w; H = h; src.width = w; src.height = h;
+      img = sctx.createImageData(w, h);
+      buf32 = new Uint32Array(img.data.buffer);
+      buf32.fill(0xFF000000);
+    }
+    scr.style.setProperty('--ar', crop.w + ' / ' + crop.h);
+    fitCanvas();
+  }
+  setScreen(160, 144);
+  if (window.ResizeObserver) new ResizeObserver(fitCanvas).observe(cv);
+  window.addEventListener('resize', fitCanvas);
+  document.addEventListener('fullscreenchange', () => setTimeout(fitCanvas, 50));
+
+  let sys = null, romName = '', paused = false, dirty = false, muted = false, memState = null, vol = 0.8;
+  try{ const v = parseInt(localStorage.getItem('tamboy-volume'), 10); if (v >= 0 && v <= 100) vol = v / 100; }catch(e){}
+
+  // ---------- Toast ----------
+  let toastT;
+  function toast(msg){
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  // ---------- Audio ----------
+  const AB = 16384, AM = AB - 1;
+  const aL = new Float32Array(AB), aR = new Float32Array(AB);
+  let aw = 0, ar = 0, actx = null;
+  const outRate = () => actx ? actx.sampleRate : 44100;
+  function pushSample(l, r){ aL[aw] = l; aR[aw] = r; aw = (aw + 1) & AM; }
+  // Game Boy audio comes out at 44.1 kHz; resample it to the device rate.
+  let rsPos = 0, rsL = 0, rsR = 0;
+  function pushResampled(l, r){
+    const step = 44100 / outRate();
+    while (rsPos < 1){ pushSample(rsL + (l - rsL) * rsPos, rsR + (r - rsR) * rsPos); rsPos += step; }
+    rsPos -= 1; rsL = l; rsR = r;
+  }
+  function ensureAudio(){
+    if (actx){ if (actx.state === 'suspended') actx.resume().catch(()=>{}); return; }
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext;
+      actx = new AC();
+      const proc = actx.createScriptProcessor(1024, 0, 2);
+      proc.onaudioprocess = e => {
+        const L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1);
+        let avail = (aw - ar) & AM;
+        if (avail > 6000){ ar = (aw - 2048) & AM; avail = 2048; }
+        const live = sys && !paused;
+        const g = muted ? 0 : vol * vol;
+        for (let i = 0; i < L.length; i++){
+          if (avail > 0 && live){
+            L[i] = aL[ar] * g; R[i] = aR[ar] * g;
+            ar = (ar + 1) & AM; avail--;
+          } else { L[i] = 0; R[i] = 0; }
+        }
+      };
+      proc.connect(actx.destination);
+      if (actx.state === 'suspended') actx.resume().catch(()=>{});
+    }catch(err){ actx = null; }
+  }
+  window.addEventListener('pointerdown', ensureAudio, true);
+  window.addEventListener('keydown', ensureAudio, true);
+
+  // ---------- Helpers ----------
+  function bytesToStr(u8){
+    let s = '';
+    for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+    return s;
+  }
+  const b64 = u8 => btoa(bytesToStr(u8));
+  function unb64(s){ const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+
+  // ---------- NES ----------
+  const NESBTN = { a:0, b:1, select:2, start:3, up:4, down:5, left:6, right:7 };
+  function makeNES(bytes){
+    const romStr = bytesToStr(bytes);
+    const nes = new jsnes.NES({
+      sampleRate: outRate(),
+      onFrame(fb){ for (let i = 0; i < 61440; i++) buf32[i] = 0xFF000000 | fb[i]; dirty = true; },
+      onAudioSample: pushSample
+    });
+    nes.loadROM(romStr);
+    let held = new Set();
+    return {
+      label: 'NES', w: 256, h: 240, fps: 60.0988, crop: { x: 8, y: 8, w: 240, h: 224 },
+      frame(){ nes.frame(); },
+      setButtons(now){
+        now.forEach(b => { if (!held.has(b)) nes.buttonDown(1, NESBTN[b]); });
+        held.forEach(b => { if (!now.has(b)) nes.buttonUp(1, NESBTN[b]); });
+        held = new Set(now);
+      },
+      reset(){ nes.loadROM(romStr); held = new Set(); },
+      save(){ return JSON.stringify(nes.toJSON()); },
+      load(s){ nes.fromJSON(JSON.parse(s)); held = new Set(); },
+      readRam: null, writeRam: null
+    };
+  }
+
+  // ---------- Game Boy / Game Boy Color ----------
+  let gbCore = null;
+  async function getGB(){
+    if (!gbCore){ const r = await WasmBoyTsCore(); gbCore = { e: r.instance.exports, mem: r.byteMemory }; }
+    return gbCore;
+  }
+  const gbSample = v => { v = (v - 1) / 127 - 1; if (Math.abs(v) < 0.008) v = 0; return v / 2.5; };
+  function makeGB(core, bytes){
+    const { e, mem } = core;
+    const n = k => e[k].valueOf();
+    const ROM = n('CARTRIDGE_ROM_LOCATION'), FR = n('FRAME_LOCATION'), AU = n('AUDIO_BUFFER_LOCATION');
+    const RAM = n('CARTRIDGE_RAM_LOCATION'), ST = n('WASMBOY_STATE_LOCATION'), STS = n('WASMBOY_STATE_SIZE');
+    const IM = n('GAMEBOY_INTERNAL_MEMORY_LOCATION'), IMS = n('GAMEBOY_INTERNAL_MEMORY_SIZE');
+    const PL = n('GBC_PALETTE_LOCATION'), PLS = n('GBC_PALETTE_SIZE');
+    const t = bytes[0x147];
+    const ramSize = (t >= 1 && t <= 3) || (t >= 15 && t <= 19) ? 32768 : (t >= 5 && t <= 6) ? 2048 : (t >= 25 && t <= 30) ? 131072 : 0;
+    function boot(){ mem.fill(0); mem.set(bytes.subarray(0, Math.min(bytes.length, n('CARTRIDGE_ROM_SIZE'))), ROM); e.config(0, 1, 0, 0, 0, 0, 1, 0, 0, 0); }
+    boot();
+    let pad = [0,0,0,0,0,0,0,0];
+    const self = {
+      label: e.isGBC() ? 'Game Boy Color' : 'Game Boy', w: 160, h: 144, fps: 59.7275,
+      frame(){
+        e.setJoypadState(pad[0], pad[1], pad[2], pad[3], pad[4], pad[5], pad[6], pad[7]);
+        // Run until the screen finishes drawing (the start of vertical blank), so the
+        // picture is always one whole frame and never half old, half new.
+        let prevLY = e.getLY(), cycles = 0;
+        for (;;){
+          const c = e.executeStep();
+          if (c < 0) throw new Error('crashed');
+          cycles += c;
+          const ly = e.getLY();
+          if (ly >= 144 && prevLY < 144) break;
+          prevLY = ly;
+          if (cycles > 300000) break;
+        }
+        for (let i = 0, j = FR; i < 23040; i++, j += 3) buf32[i] = 0xFF000000 | (mem[j + 2] << 16) | (mem[j + 1] << 8) | mem[j];
+        dirty = true;
+        const count = e.getNumberOfSamplesInAudioBuffer();
+        for (let k = 0, j = AU; k < count; k++, j += 2) pushResampled(gbSample(mem[j]), gbSample(mem[j + 1]));
+        e.clearAudioBuffer();
+      },
+      setButtons(now){
+        pad = ['up','right','down','left','a','b','select','start'].map(b => now.has(b) ? 1 : 0);
+      },
+      reset(){ const r = self.readRam(); boot(); self.writeRam(r); },
+      save(){
+        e.saveState();
+        return JSON.stringify({ gb: 1, st: b64(mem.subarray(ST, ST + STS)), im: b64(mem.subarray(IM, IM + IMS)),
+          pl: b64(mem.subarray(PL, PL + PLS)), ram: b64(mem.subarray(RAM, RAM + ramSize)) });
+      },
+      load(s){
+        const o = JSON.parse(s);
+        if (!o.gb) throw new Error('not a Game Boy state');
+        mem.set(unb64(o.ram), RAM); mem.set(unb64(o.im), IM); mem.set(unb64(o.pl), PL); mem.set(unb64(o.st), ST);
+        e.loadState();
+      },
+      readRam(){ return ramSize ? mem.slice(RAM, RAM + ramSize) : null; },
+      writeRam(r){ if (ramSize && r) mem.set(r.subarray(0, ramSize), RAM); }
+    };
+    return self;
+  }
+
+  // ---------- Storage (last ROM + in-game saves) ----------
+  let dbP = null;
+  function openDB(){
+    if (!dbP) dbP = new Promise((res, rej) => {
+      if (!window.indexedDB) return rej(new Error('no indexedDB'));
+      const r = indexedDB.open('cartridge', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('roms');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return dbP;
+  }
+  async function idbPut(key, val){
+    try{ const db = await openDB(); db.transaction('roms', 'readwrite').objectStore('roms').put(val, key); }catch(e){}
+  }
+  async function idbGet(key){
+    try{
+      const db = await openDB();
+      return await new Promise((res, rej) => {
+        const q = db.transaction('roms').objectStore('roms').get(key);
+        q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
+      });
+    }catch(e){ return undefined; }
+  }
+  let savSig = 0;
+  function ramSig(r){ let h = 0; for (let i = 0; i < r.length; i++) h = (h * 31 + r[i]) | 0; return h; }
+  function saveBattery(){
+    if (!sys || !sys.readRam) return;
+    const r = sys.readRam();
+    if (!r) return;
+    const sig = ramSig(r);
+    if (sig === savSig) return;
+    savSig = sig;
+    idbPut('sav:' + romName, r.buffer);
+  }
+  setInterval(saveBattery, 3000);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveBattery(); });
+  window.addEventListener('pagehide', saveBattery);
+
+  // ---------- Loading ----------
+  function detect(bytes, name){
+    if (bytes[0] === 0x4E && bytes[1] === 0x45 && bytes[2] === 0x53 && bytes[3] === 0x1A) return 'nes';
+    if (bytes.length >= 0x150 && bytes[0x104] === 0xCE && bytes[0x105] === 0xED && bytes[0x106] === 0x66 && bytes[0x107] === 0x66) return 'gb';
+    if (/\.(gbc?|cgb)$/i.test(name) && bytes.length >= 0x8000) return 'gb';
+    return null;
+  }
+  let loading = false;
+  async function loadBytes(bytes, fileName){
+    const kind = detect(bytes, fileName);
+    if (!kind){ toast('That file isn’t a ROM TamBoy can play. Choose an unzipped .gb, .gbc, or .nes file.'); return false; }
+    if (loading) return false;
+    loading = true;
+    ensureAudio();
+    saveBattery();
+    let next;
+    try{
+      if (kind === 'nes'){
+        if (typeof jsnes === 'undefined') throw new Error('nes engine missing');
+        next = makeNES(bytes);
+      } else {
+        if (typeof WasmBoyTsCore === 'undefined') throw new Error('gb engine missing');
+        next = makeGB(await getGB(), bytes);
+      }
+    }catch(err){
+      loading = false;
+      toast(/missing/.test(err.message) ? 'The emulator didn’t load. Check your connection and reopen the page.'
+        : kind === 'nes' ? 'This game uses cartridge hardware the player doesn’t support yet.' : 'This game couldn’t be started.');
+      return false;
+    }
+    sys = next;
+    setScreen(sys.w, sys.h, sys.crop);
+    romName = fileName.replace(/\.(nes|gbc?|cgb)$/i, '');
+    memState = null; held = new Set(); kbdSync();
+    paused = false; aw = ar = 0; acc = 0;
+    if (sys.writeRam){
+      const sav = await idbGet('sav:' + romName);
+      if (sav) sys.writeRam(new Uint8Array(sav));
+      const r = sys.readRam(); savSig = r ? ramSig(r) : 0;
+    }
+    $('empty').hidden = true;
+    scheduleAutoStart();
+    refreshUI();
+    loading = false;
+    return true;
+  }
+
+  function loadFile(file){
+    if (!file) return;
+    ensureAudio();
+    const fr = new FileReader();
+    fr.onload = async () => {
+      if (await loadBytes(new Uint8Array(fr.result), file.name)){
+        toast('Loaded ' + romName);
+        idbPut('last', { name: file.name, buf: fr.result });
+      }
+    };
+    fr.onerror = () => toast('Couldn’t read that file. Try choosing it again.');
+    fr.readAsArrayBuffer(file);
+  }
+
+  async function restoreRom(){
+    const rec = await idbGet('last');
+    if (!rec || !rec.buf || sys) return;
+    ensureAudio();
+    if (await loadBytes(new Uint8Array(rec.buf), rec.name)){
+      toast(actx && actx.state !== 'running' ? 'Loaded ' + romName + '. Tap anywhere for sound.' : 'Loaded ' + romName);
+    }
+  }
+
+  // ---------- Input ----------
+  const kbd = new Set(), pad = new Set(), touch = new Map();
+  let held = new Set();
+  function sync(){
+    const now = new Set([...kbd, ...pad]);
+    touch.forEach(s => s.forEach(b => now.add(b)));
+    if (now.size && autoPlan){ autoPlan = null; autoHold = false; }
+    if (autoHold) now.add('start');
+    if (sys) sys.setButtons(now);
+    held = now;
+    document.querySelectorAll('[data-b]').forEach(el => el.classList.toggle('on', now.has(el.dataset.b)));
+    document.querySelectorAll('[data-dir]').forEach(el => el.classList.toggle('on', now.has(el.dataset.dir)));
+  }
+  function kbdSync(){ if (sys) sys.setButtons(held); }
+  const buzz = () => { if (navigator.vibrate) try{ navigator.vibrate(8); }catch(e){} };
+
+  const KEYS = {
+    ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
+    KeyW:'up', KeyS:'down', KeyA:'left', KeyD:'right',
+    KeyX:'a', KeyZ:'b', Enter:'start', ShiftLeft:'select', ShiftRight:'select'
+  };
+  window.addEventListener('keydown', e => {
+    if (e.code === 'KeyP' && !e.repeat){ togglePause(); return; }
+    const b = KEYS[e.code];
+    if (!b) return;
+    if (e.target && e.target.tagName === 'BUTTON' && e.code === 'Enter' && !sys) return;
+    e.preventDefault(); kbd.add(b); sync();
+  });
+  window.addEventListener('keyup', e => { const b = KEYS[e.code]; if (b){ kbd.delete(b); sync(); } });
+  window.addEventListener('blur', () => { kbd.clear(); touch.clear(); sync(); });
+
+  document.querySelectorAll('[data-b]').forEach(el => {
+    const b = el.dataset.b;
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      try{ el.setPointerCapture(e.pointerId); }catch(_){}
+      touch.set(e.pointerId, new Set([b])); buzz(); sync();
+    });
+    const up = e => { if (touch.delete(e.pointerId)) sync(); };
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('lostpointercapture', up);
+    el.addEventListener('contextmenu', e => e.preventDefault());
+  });
+
+  const dpad = $('dpad');
+  function dirsAt(e){
+    const r = dpad.getBoundingClientRect();
+    const dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+    const dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+    const d = Math.hypot(dx, dy), s = new Set();
+    if (d < 0.18) return s;
+    const c = dx / d, n = dy / d, T = 0.55;
+    if (c > T) s.add('right'); if (c < -T) s.add('left');
+    if (n > T) s.add('down');  if (n < -T) s.add('up');
+    return s;
+  }
+  const same = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+  dpad.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try{ dpad.setPointerCapture(e.pointerId); }catch(_){}
+    touch.set(e.pointerId, dirsAt(e)); buzz(); sync();
+  });
+  dpad.addEventListener('pointermove', e => {
+    if (!touch.has(e.pointerId)) return;
+    const s = dirsAt(e);
+    if (!same(s, touch.get(e.pointerId))){ touch.set(e.pointerId, s); if (s.size) buzz(); sync(); }
+  });
+  const dUp = e => { if (touch.delete(e.pointerId)) sync(); };
+  dpad.addEventListener('pointerup', dUp);
+  dpad.addEventListener('pointercancel', dUp);
+  dpad.addEventListener('lostpointercapture', dUp);
+  dpad.addEventListener('contextmenu', e => e.preventDefault());
+
+  let padsOn = 0;
+  window.addEventListener('gamepadconnected', () => { padsOn++; toast('Gamepad connected'); });
+  window.addEventListener('gamepaddisconnected', () => { padsOn = Math.max(0, padsOn - 1); pad.clear(); sync(); });
+  function pollPads(){
+    const gps = navigator.getGamepads ? navigator.getGamepads() : [];
+    const s = new Set();
+    for (const g of gps){
+      if (!g) continue;
+      const p = i => g.buttons[i] && g.buttons[i].pressed;
+      if (p(0) || p(2)) s.add('b');
+      if (p(1) || p(3)) s.add('a');
+      if (p(8)) s.add('select');
+      if (p(9)) s.add('start');
+      if (p(12) || g.axes[1] < -0.5) s.add('up');
+      if (p(13) || g.axes[1] > 0.5) s.add('down');
+      if (p(14) || g.axes[0] < -0.5) s.add('left');
+      if (p(15) || g.axes[0] > 0.5) s.add('right');
+    }
+    if (!same(s, pad)){ pad.clear(); s.forEach(b => pad.add(b)); sync(); }
+  }
+
+  // ---------- Auto-start: press Start past the title screen ----------
+  let autoStart = true, autoPlan = null, autoHold = false, fcount = 0;
+  try{ autoStart = localStorage.getItem('cartridge-autostart') !== 'off'; }catch(e){}
+  function scheduleAutoStart(){
+    autoHold = false;
+    autoPlan = autoStart ? { begin: fcount, next: fcount + 60, snap: null, still: 0, busy: 0, presses: 0, releaseAt: null } : null;
+  }
+  function screenChange(snap){
+    let diff = 0, total = 0;
+    for (let i = 0; i < buf32.length; i++){ total++; if (buf32[i] !== snap[i]) diff++; }
+    return diff / total;
+  }
+  // Watches the screen: when it holds still for about a second it is waiting
+  // for a button, so press Start. Once the picture keeps moving after a press,
+  // the game is playing and auto-start stops.
+  function autoTick(){
+    const p = autoPlan;
+    if (!p) return;
+    if (p.releaseAt !== null){
+      if (fcount >= p.releaseAt){ autoHold = false; p.releaseAt = null; p.snap = null; p.still = 0; p.busy = 0; p.next = fcount + 60; sync(); }
+      return;
+    }
+    if (fcount - p.begin > 60 * 30 || p.presses >= 5){ autoPlan = null; return; }
+    if (fcount < p.next) return;
+    p.next = fcount + 20;
+    if (!p.snap || p.snap.length !== buf32.length){ p.snap = buf32.slice(); return; }
+    const ch = screenChange(p.snap);
+    p.snap = buf32.slice();
+    if (ch < 0.002){ p.still++; p.busy = 0; } else { p.busy++; p.still = 0; }
+    if (p.presses > 0 && p.busy >= 4){ autoPlan = null; return; }
+    if (p.still >= 3){ p.presses++; autoHold = true; p.releaseAt = fcount + 6; sync(); }
+  }
+
+  // ---------- Main loop ----------
+  let last = 0, acc = 0;
+  function loop(t){
+    requestAnimationFrame(loop);
+    if (padsOn) pollPads();
+    const dt = last ? t - last : 0; last = t;
+    if (sys && !paused){
+      const STEP = 1000 / sys.fps;
+      acc += Math.min(dt, 250);
+      let n = 0;
+      try{
+        while (acc >= STEP && n < 4){ sys.frame(); fcount++; autoTick(); acc -= STEP; n++; }
+      }catch(err){ paused = true; toast('The game stopped responding. Press Reset to try again.'); refreshUI(); }
+      if (n === 4) acc = 0;
+    }
+    if (dirty){ present(); dirty = false; }
+  }
+  requestAnimationFrame(loop);
+
+  // ---------- Tools ----------
+  function refreshUI(){
+    const has = !!sys;
+    ['tPause','tReset','tSave','tLoad'].forEach(id => $(id).disabled = !has);
+    $('tPause').textContent = paused ? 'Resume' : 'Pause';
+    $('tSound').textContent = muted ? 'Sound off' : 'Sound on';
+    $('tAuto').textContent = autoStart ? 'Auto-start on' : 'Auto-start off';
+    $('gname').textContent = has ? romName : 'No game loaded';
+    $('gstate').textContent = !has ? '' : paused ? 'Paused' : sys.label;
+    const led = $('led');
+    led.classList.toggle('on', has);
+    led.classList.toggle('paused', has && paused);
+    $('powerLabel').textContent = !has ? 'Off' : paused ? 'Paused' : 'On';
+  }
+  function togglePause(){
+    if (!sys) return;
+    paused = !paused; acc = 0; refreshUI();
+  }
+  function openPicker(){ ensureAudio(); $('file').value = ''; $('file').click(); }
+  $('pick').addEventListener('click', openPicker);
+  $('tOpen').addEventListener('click', openPicker);
+  $('file').addEventListener('change', e => loadFile(e.target.files[0]));
+  $('tPause').addEventListener('click', togglePause);
+  $('tReset').addEventListener('click', () => {
+    if (!sys) return;
+    saveBattery();
+    try{ sys.reset(); }catch(e){}
+    scheduleAutoStart(); sync(); paused = false; refreshUI(); toast('Game reset');
+  });
+  const stateKey = () => 'cartridge-state:' + romName;
+  $('tSave').addEventListener('click', () => {
+    if (!sys) return;
+    try{
+      memState = sys.save();
+      try{ localStorage.setItem(stateKey(), memState); }catch(e){}
+      toast('State saved');
+    }catch(e){ toast('Couldn’t save a state for this game.'); }
+  });
+  $('tLoad').addEventListener('click', () => {
+    if (!sys) return;
+    let s = memState;
+    if (!s){ try{ s = localStorage.getItem(stateKey()); }catch(e){} }
+    if (!s){ toast('No saved state for this game yet'); return; }
+    try{ sys.load(s); autoPlan = null; autoHold = false; sync(); paused = false; refreshUI(); toast('State loaded'); }
+    catch(e){ try{ sys.reset(); }catch(_){} toast('That saved state couldn’t be loaded, so the game was reset.'); }
+  });
+  $('tSound').addEventListener('click', () => { muted = !muted; ensureAudio(); refreshUI(); });
+  $('tAuto').addEventListener('click', () => {
+    autoStart = !autoStart;
+    if (!autoStart){ autoPlan = null; autoHold = false; sync(); }
+    try{ localStorage.setItem('cartridge-autostart', autoStart ? 'on' : 'off'); }catch(e){}
+    refreshUI();
+  });
+  if (!(document.fullscreenEnabled && scr.requestFullscreen)) $('tFull').hidden = true;
+  $('tFull').addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else scr.requestFullscreen().catch(() => toast('Full screen isn’t available here.'));
+  });
+
+  // ---------- Volume ----------
+  const volEl = $('vol'), volVal = $('volVal');
+  function showVol(){ const v = Math.round(vol * 100); volEl.value = v; volVal.textContent = v + '%'; }
+  volEl.addEventListener('input', () => {
+    vol = volEl.value / 100;
+    if (muted && vol > 0){ muted = false; refreshUI(); }
+    volVal.textContent = volEl.value + '%';
+    ensureAudio();
+    try{ localStorage.setItem('tamboy-volume', volEl.value); }catch(e){}
+  });
+  window.addEventListener('keydown', e => {
+    if (e.target === volEl) return;
+    if (e.key === '-' || e.key === '='  || e.key === '+'){
+      vol = Math.max(0, Math.min(1, vol + (e.key === '-' ? -0.1 : 0.1)));
+      if (muted && vol > 0){ muted = false; refreshUI(); }
+      showVol(); toast('Volume ' + Math.round(vol * 100) + '%');
+      try{ localStorage.setItem('tamboy-volume', Math.round(vol * 100)); }catch(_){}
+    }
+  });
+  showVol();
+
+  // ---------- Drag and drop ----------
+  let dragDepth = 0;
+  window.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('drag'); });
+  window.addEventListener('dragleave', () => { if (--dragDepth <= 0){ dragDepth = 0; document.body.classList.remove('drag'); } });
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => {
+    e.preventDefault(); dragDepth = 0; document.body.classList.remove('drag');
+    const f = e.dataTransfer && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+
+  if (typeof jsnes === 'undefined' && typeof WasmBoyTsCore === 'undefined'){
+    $('empty').querySelector('p').textContent = 'The emulator didn’t load. Check your connection and reopen this page.';
+    $('pick').hidden = true;
+  }
+  refreshUI();
+  restoreRom();
+})();
+</script>
+</body>
+</html>
